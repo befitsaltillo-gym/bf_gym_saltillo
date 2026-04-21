@@ -97,6 +97,7 @@
       series: ejercicio?.series || '-',
       repeticiones: ejercicio?.repeticiones || '-',
       peso_sugerido: ejercicio?.peso_sugerido || '',
+      notas: ejercicio?.notas || '',
     };
   }
 
@@ -243,6 +244,7 @@
             <span class="chip">${ej.repeticiones} reps</span>
             ${ej.peso_sugerido ? `<span class="chip">&#x1F3CB;&#xFE0F; ${ej.peso_sugerido}</span>` : ''}
           </div>
+          ${ej.notas ? `<div class="muted" style="font-size:12px;padding:6px;background:rgba(255,255,255,0.05);border-radius:4px;margin:6px 0;">💬 <strong>Coach:</strong> ${ej.notas}</div>` : ''}
           <div class="exercise-actions">
             <input type="checkbox" class="check-large" aria-label="Completar ejercicio" />
             <input type="text" class="input-field" placeholder="Peso usado..." style="max-width:180px;" />
