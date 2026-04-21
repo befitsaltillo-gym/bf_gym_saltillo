@@ -331,7 +331,7 @@
           <textarea id="inputObservaciones" class="input-field" rows="2"
                     placeholder="Observaciones del coach...">${socio.rutina.observaciones || ''}</textarea>
         </div>
-        <div id="contenedorDias">${dias.map(htmlDia).join('')}</div>
+        <div id="contenedorDias">${dias.map((dia, i) => htmlDia(i, dia)).join('')}</div>
         <button type="button" id="btnAddDia" class="btn-ghost" style="margin-bottom:14px;font-size:12px;">+ Agregar dia</button>
         <div id="msgRutina" style="min-height:18px;font-size:12px;margin-bottom:8px;"></div>
         <button type="button" id="btnGuardarRutina" class="btn-red" style="width:100%;">Guardar rutina</button>
