@@ -75,6 +75,7 @@
 
     return {
       id: item?.id || item?.usuario_id || item?.usuario?.id || '',
+      rol: item?.rol || item?.usuario?.rol || '',
       numero_socio: item?.numero_socio || item?.usuario?.numero_socio || 'BF-000',
       nombre: item?.nombre_completo || item?.usuario?.nombre_completo || item?.nombre || 'Socio',
       objetivo: perfil?.objetivo || 'Sin objetivo',
@@ -107,7 +108,7 @@
       const items = Array.isArray(data)
         ? data
         : Array.isArray(data?.socios) ? data.socios : [];
-      sociosActuales = items.map(normalizarSocio);
+      sociosActuales = items.map(normalizarSocio).filter((s) => s.rol === 'socio' || s.rol === '');
     } catch {
       sociosActuales = esSesionDemo ? sociosDemo : [];
     }
