@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeFit Rutinas - Socio</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-bg">
+  <div id="offlineBanner" class="offline-banner hidden">Sin conexion — los cambios se guardaran cuando vuelvas a conectarte</div>
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="brand">
+        <img src="img/BeFit.png" alt="BeFit" />
+        <div>
+          <div class="brand-name"><span class="be">Be</span><span class="fit">Fit</span></div>
+          <div id="nombreSocio" class="muted" style="font-size:12px;">Socio</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="numeroSocio" class="badge-blue">BF-000</span>
+        <button class="btn-ghost" id="btnLogout" type="button">Cerrar sesion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container layout panel-grid">
+    <section id="alertaRutina" class="alert-banner hidden">Es momento de cambiar tu rutina.</section>
+
+    <section class="quick-cards" id="quickCards"></section>
+
+    <!-- Barra de progreso y asistencia semanal -->
+    <section class="card" style="padding:14px;display:grid;gap:12px;" id="seccionProgreso">
+      <div>
+        <div class="progress-label">
+          <span>Progreso de rutina</span>
+          <span id="progresoLabel">Dia 0 de 30</span>
+        </div>
+        <div class="progress-bar"><div id="progresoFill" class="progress-fill" style="width:0%;"></div></div>
+      </div>
+      <div>
+        <p class="muted" style="font-size:11px;margin:0 0 6px;text-transform:uppercase;letter-spacing:1px;">Asistencia esta semana</p>
+        <div id="asistenciaSemanal" class="asistencia-semanal"></div>
+      </div>
+    </section>
+
+    <section class="card" style="padding:16px;">
+      <div class="section-head">
+        <h2 class="section-title" id="tituloRutina">Rutina activa</h2>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="diasRutina" class="badge-blue">Dia 0 de 30</span>
+          <button type="button" class="btn-ghost" id="btnImprimir" onclick="window.print()" title="Imprimir rutina" style="font-size:11px;min-height:36px;padding:0 10px;">&#x1F5A8; Imprimir</button>
+        </div>
+      </div>
+      <div class="tabs" id="tabsDias"></div>
+      <div class="muted" id="nombreDia" style="margin-bottom:10px;"></div>
+      <div id="listaEjercicios" class="exercise-list"></div>
+      <div style="margin-top:12px;display:grid;gap:10px;">
+        <textarea id="notasSesion" class="input-field" placeholder="Notas de tu sesion..."></textarea>
+        <button id="btnGuardarSesion" class="btn-red" type="button">Guardar sesion</button>
+      </div>
+    </section>
+
+    <section class="card" id="seccionHistorial" style="padding:16px;">
+      </div>
+      <div class="table-wrap">
+        <table class="history-table" id="tablaHistorial">
+          <thead>
+            <tr><th>Fecha</th><th>Dia</th><th>Completados</th><th>Notas</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="seccionCambioPass" style="padding:16px;">
+      <div class="section-head">
+        <h2 class="section-title" style="font-size:16px;">Cambiar contrasena</h2>
+      </div>
+      <form id="formCambioPass" class="change-pass-form">
+        <div class="field">
+          <label for="passNueva">Nueva contrasena</label>
+          <input id="passNueva" class="input-field" type="password" placeholder="Nueva contrasena" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label for="passConfirmar">Confirmar contrasena</label>
+          <input id="passConfirmar" class="input-field" type="password" placeholder="Repetir contrasena" autocomplete="new-password" />
+        </div>
+        <div id="passError" class="form-error"></div>
+        <button type="submit" class="btn-ghost">Actualizar contrasena</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="toastOk" class="toast toast-success">Sesion guardada</div>
+  <div id="toastError" class="toast toast-error">No fue posible guardar</div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard-socio.js"></script>
+</body>
+</html>

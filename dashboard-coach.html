@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeFit Rutinas - Coach</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-bg">
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="brand">
+        <img src="img/BeFit.png" alt="BeFit" />
+        <div class="brand-name"><span class="be">Be</span><span class="fit">Fit</span></div>
+        <span class="badge-blue">Panel Coach</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="nombreCoach" class="muted" style="font-size:12px;">Coach</span>
+        <button class="btn-ghost" id="btnLogout" type="button">Cerrar sesion</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="offlineBanner" class="offline-banner hidden">Sin conexion — los cambios se guardaran cuando vuelvas a conectarte</div>
+
+  <!-- Modal: Nuevo Socio -->
+  <div id="modalNuevoSocio" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalNuevoSocioTitulo">
+    <div class="modal-panel">
+      <button class="modal-close" id="btnCerrarModalSocio" type="button">&#x2715;</button>
+      <h2 id="modalNuevoSocioTitulo">Nuevo Socio</h2>
+      <div class="modal-steps">
+        <div class="modal-step active" id="step1Indicator"></div>
+        <div class="modal-step" id="step2Indicator"></div>
+      </div>
+
+      <!-- Paso 1: Acceso -->
+      <div id="pasoAcceso">
+        <p class="muted" style="font-size:12px;margin:0 0 14px;">Paso 1 de 2 — Datos de acceso</p>
+        <div style="display:grid;gap:10px;">
+          <div class="field">
+            <label for="ns_nombre">Nombre completo</label>
+            <input id="ns_nombre" class="input-field" type="text" placeholder="Nombre y apellidos" />
+          </div>
+          <div class="field">
+            <label for="ns_username">Usuario</label>
+            <input id="ns_username" class="input-field" type="text" placeholder="nombre.apellido" />
+          </div>
+          <div class="field">
+            <label for="ns_email">Email</label>
+            <input id="ns_email" class="input-field" type="email" placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="field">
+            <label for="ns_password">Contrasena temporal</label>
+            <input id="ns_password" class="input-field" type="text" placeholder="Contrasena temporal" />
+          </div>
+          <div class="field">
+            <label for="ns_numero">Numero de socio</label>
+            <input id="ns_numero" class="input-field" type="text" placeholder="BF-XXX (auto-generado)" />
+          </div>
+        </div>
+        <div id="nsError1" class="form-error"></div>
+        <button type="button" id="btnSiguientePaso" class="btn-red" style="width:100%;margin-top:14px;">Siguiente</button>
+      </div>
+
+      <!-- Paso 2: Perfil fisico -->
+      <div id="pasoPerfil" class="hidden">
+        <p class="muted" style="font-size:12px;margin:0 0 14px;">Paso 2 de 2 — Perfil fisico</p>
+        <div class="perfil-row">
+          <div class="field">
+            <label for="ns_edad">Edad</label>
+            <input id="ns_edad" class="input-field" type="number" placeholder="Edad" min="10" max="100" />
+          </div>
+          <div class="field">
+            <label for="ns_peso">Peso (kg)</label>
+            <input id="ns_peso" class="input-field" type="number" placeholder="70" />
+          </div>
+          <div class="field">
+            <label for="ns_estatura">Estatura (cm)</label>
+            <input id="ns_estatura" class="input-field" type="number" placeholder="170" />
+          </div>
+          <div class="field">
+            <label for="ns_frecuencia">Frecuencia semanal</label>
+            <input id="ns_frecuencia" class="input-field" type="number" placeholder="3" min="1" max="7" />
+          </div>
+        </div>
+        <div class="field" style="margin-top:6px;">
+          <label for="ns_objetivo">Objetivo</label>
+          <input id="ns_objetivo" class="input-field" type="text" placeholder="Ganar musculo, perder grasa..." />
+        </div>
+        <div class="field">
+          <label for="ns_lesiones">Lesiones</label>
+          <input id="ns_lesiones" class="input-field" type="text" placeholder="Ninguna o describirlas" />
+        </div>
+        <div class="field">
+          <label for="ns_contraindicaciones">Contraindicaciones</label>
+          <input id="ns_contraindicaciones" class="input-field" type="text" placeholder="Ninguna o describirlas" />
+        </div>
+        <div id="nsError2" class="form-error"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button type="button" id="btnAnteriorPaso" class="btn-ghost" style="flex:1;">Atras</button>
+          <button type="button" id="btnCrearSocio" class="btn-red" style="flex:2;">Crear Socio</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="container layout panel-grid two-col">
+    <section class="card" style="padding:16px;">
+      <div class="section-head" style="margin-bottom:10px;">
+        <h2 class="section-title">Socios</h2>
+        <button type="button" id="btnNuevoSocio" class="btn-red" style="font-size:11px;">+ Nuevo Socio</button>
+      </div>
+      <input id="filtroSocio" class="input-field" type="text" placeholder="Buscar por nombre o numero de socio" />
+      <div id="listaSocios" style="display:grid;gap:10px;margin-top:12px;"></div>
+    </section>
+
+    <section class="card" style="padding:16px;">
+      <div class="section-head">
+        <h2 class="section-title">Edicion de rutina</h2>
+      </div>
+      <div id="detalleSocio" class="card" style="padding:12px;margin-top:12px;">
+        Selecciona un socio para comenzar.
+      </div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard-coach.js"></script>
+</body>
+</html>

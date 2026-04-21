@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeFit Rutinas - Admin</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-bg">
+  <div id="offlineBanner" class="offline-banner hidden">Sin conexion — los cambios se guardaran cuando vuelvas a conectarte</div>
+  <div id="modalConfirm" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel" style="max-width:400px;">
+      <h2 id="modalConfirmTitulo" style="font-size:16px;">Confirmar accion</h2>
+      <p id="modalConfirmMsg" class="muted" style="margin:0 0 20px;line-height:1.6;font-size:13px;"></p>
+      <div style="display:flex;gap:8px;">
+        <button type="button" id="btnConfirmCancelar" class="btn-ghost" style="flex:1;">Cancelar</button>
+        <button type="button" id="btnConfirmOk" class="btn-danger" style="flex:1;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal crear usuario -->
+  <div id="modalCrearUsuario" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalCrearTitulo">
+    <div class="modal-panel">
+      <button class="modal-close" id="btnCerrarModalCrear" type="button">&#x2715;</button>
+      <h2 id="modalCrearTitulo">Nuevo usuario</h2>
+      <div class="modal-steps">
+        <div class="modal-step active" id="crearStep1"></div>
+        <div class="modal-step" id="crearStep2"></div>
+      </div>
+
+      <div id="crearPasoAcceso">
+        <p class="muted" style="font-size:12px;margin:0 0 14px;">Paso 1 de 2 — Datos de acceso</p>
+        <div id="crearRolInfo" class="badge-blue" style="margin-bottom:12px;display:inline-flex;"></div>
+        <div style="display:grid;gap:10px;">
+          <div class="field">
+            <label for="cu_nombre">Nombre completo</label>
+            <input id="cu_nombre" class="input-field" type="text" placeholder="Nombre y apellidos" />
+          </div>
+          <div class="field">
+            <label for="cu_username">Usuario</label>
+            <input id="cu_username" class="input-field" type="text" placeholder="nombre.apellido" />
+          </div>
+          <div class="field">
+            <label for="cu_email">Email</label>
+            <input id="cu_email" class="input-field" type="email" placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="field">
+            <label for="cu_password">Contrasena temporal</label>
+            <input id="cu_password" class="input-field" type="text" placeholder="Contrasena temporal" />
+          </div>
+          <div class="field" id="cuNumeroWrap">
+            <label for="cu_numero">Numero de socio</label>
+            <input id="cu_numero" class="input-field" type="text" placeholder="BF-XXX" />
+          </div>
+        </div>
+        <div id="cuError1" class="form-error"></div>
+        <button type="button" id="cuBtnSiguiente" class="btn-red" style="width:100%;margin-top:14px;">Siguiente</button>
+      </div>
+
+      <div id="crearPasoPerfil" class="hidden">
+        <p class="muted" style="font-size:12px;margin:0 0 14px;">Paso 2 de 2 — Perfil fisico</p>
+        <div class="perfil-row">
+          <div class="field"><label for="cu_edad">Edad</label><input id="cu_edad" class="input-field" type="number" /></div>
+          <div class="field"><label for="cu_peso">Peso (kg)</label><input id="cu_peso" class="input-field" type="number" /></div>
+          <div class="field"><label for="cu_estatura">Estatura (cm)</label><input id="cu_estatura" class="input-field" type="number" /></div>
+          <div class="field"><label for="cu_frecuencia">Frecuencia semanal</label><input id="cu_frecuencia" class="input-field" type="number" /></div>
+        </div>
+        <div class="field" style="margin-top:6px;">
+          <label for="cu_objetivo">Objetivo</label>
+          <input id="cu_objetivo" class="input-field" type="text" placeholder="Objetivo de entrenamiento" />
+        </div>
+        <div class="field">
+          <label for="cu_lesiones">Lesiones</label>
+          <input id="cu_lesiones" class="input-field" type="text" placeholder="Ninguna o describirlas" />
+        </div>
+        <div class="field">
+          <label for="cu_contraindicaciones">Contraindicaciones</label>
+          <input id="cu_contraindicaciones" class="input-field" type="text" placeholder="Ninguna o describirlas" />
+        </div>
+        <div id="cuError2" class="form-error"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button type="button" id="cuBtnAnterior" class="btn-ghost" style="flex:1;">Atras</button>
+          <button type="button" id="cuBtnCrear" class="btn-red" style="flex:2;">Crear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="brand">
+        <img src="img/BeFit.png" alt="BeFit" />
+        <div class="brand-name"><span class="be">Be</span><span class="fit">Fit</span></div>
+        <span class="badge-red">Admin</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="nombreAdmin" class="muted" style="font-size:12px;">Administrador</span>
+        <button class="btn-ghost" id="btnLogout" type="button">Cerrar sesion</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container layout panel-grid">
+    <section class="quick-cards" id="metricas"></section>
+
+    <section class="card" style="padding:16px;">
+      <div class="section-head">
+        <h2 class="section-title">Gestion de usuarios</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-ghost" type="button" id="btnNuevoCoach">+ Nuevo coach</button>
+          <button class="btn-red" type="button" id="btnNuevoSocioAdmin">+ Nuevo socio</button>
+        </div>
+      </div>
+      <div class="filtros-admin">
+        <select id="filtroRol" class="select-field">
+          <option value="">Todos los roles</option>
+          <option value="socio">Socio</option>
+          <option value="coach">Coach</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select id="filtroEstado" class="select-field">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
+        </select>
+        <input id="filtroBuscar" class="input-field" type="text" placeholder="Buscar por nombre o usuario" style="flex:1;min-width:160px;" />
+      </div>
+      <div class="table-wrap">
+        <table class="history-table" id="tablaUsuarios">
+          <thead>
+            <tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Creacion</th><th>Acciones</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard-admin.js"></script>
+</body>
+</html>

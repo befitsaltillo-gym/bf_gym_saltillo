@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeFit Rutinas - Login</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page-bg">
+  <div id="offlineBanner" class="offline-banner hidden">Sin conexion — verifica tu conexion a internet</div>
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div class="brand">
+        <img src="img/BeFit.png" alt="BeFit" />
+        <div class="brand-name"><span class="be">Be</span><span class="fit">Fit</span></div>
+      </div>
+      <a href="lobbyindex.html" class="btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;">Volver al sitio</a>
+    </div>
+  </header>
+
+  <main class="login-wrap">
+    <section class="card login-card">
+      <img src="img/BeFit.png" alt="BeFit" class="login-logo" />
+      <h1 class="login-brand"><span class="be">Be</span><span class="fit">Fit</span></h1>
+      <p class="login-sub">Rutinas de entrenamiento</p>
+
+      <form id="formLogin" novalidate>
+        <div class="field">
+          <label for="username">Usuario</label>
+          <div class="field-icon-wrap">
+            <span class="field-icon">&#x1F464;</span>
+            <input id="username" class="input-field" type="text" autocomplete="username" placeholder="ejemplo.usuario" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Contrasena</label>
+          <div class="password-wrap field-icon-wrap">
+            <span class="field-icon">&#x1F512;</span>
+            <input id="password" class="input-field" type="password" autocomplete="current-password" placeholder="Ingresa tu contrasena" required style="padding-left:34px;padding-right:72px;" />
+            <button id="btnTogglePass" class="password-toggle" type="button">Mostrar</button>
+          </div>
+        </div>
+
+        <button id="btnLogin" class="btn-red" type="submit" style="width:100%;margin-top:8px;">Iniciar sesion</button>
+        <div id="loginError" class="form-error"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    const usuario = window.BEFIT_AUTH.usuarioActual();
+    if (usuario) {
+      window.location.href = window.BEFIT_AUTH.mapearDashboardPorRol(usuario.rol);
+    }
+
+    const form = document.getElementById('formLogin');
+    const inputUser = document.getElementById('username');
+    const inputPass = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+    const error = document.getElementById('loginError');
+    const btnTogglePass = document.getElementById('btnTogglePass');
+
+    btnTogglePass.addEventListener('click', () => {
+      const esPassword = inputPass.type === 'password';
+      inputPass.type = esPassword ? 'text' : 'password';
+      btnTogglePass.textContent = esPassword ? 'Ocultar' : 'Mostrar';
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.textContent = '';
+
+      const username = inputUser.value.trim();
+      const password = inputPass.value;
+
+      if (!username || !password) {
+        error.textContent = 'Captura usuario y contrasena.';
+        return;
+      }
+
+      btnLogin.disabled = true;
+      btnLogin.textContent = 'Validando...';
+
+      try {
+        const respuesta = await window.BEFIT_API.login(username, password);
+        if (!respuesta?.data?.token) {
+          throw new Error('No se recibio token de acceso');
+        }
+
+        window.BEFIT_AUTH.guardarToken(respuesta.data.token);
+        const perfil = window.BEFIT_AUTH.decodificarToken(respuesta.data.token);
+        window.location.href = window.BEFIT_AUTH.mapearDashboardPorRol(perfil?.rol || 'socio');
+      } catch (err) {
+        error.textContent = err.message || 'Credenciales incorrectas';
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Iniciar sesion';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BeFit Gym – Pre-Inscripción</title>
+<style>
+  :root {
+    --red:       #cc1f1f;
+    --red-dark:  #a81717;
+    --blue:      #1e4a9e;
+    --blue-light:#2a5fc7;
+    --bg:        #000000;
+    --surface:   #111111;
+    --surface2:  #1a1a1a;
+    --border:    #2a2a2a;
+    --text:      #f1f1f1;
+    --muted:     #888;
+    --success:   #22c55e;
+    --error:     #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: #000;
+    border-bottom: 2px solid var(--red);
+    padding: 18px 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 120% 180px at 50% 0%,
+        rgba(30,74,158,.28) 0%, transparent 75%),
+      radial-gradient(ellipse 80% 120px at 50% 0%,
+        rgba(204,31,31,.15) 0%, transparent 60%);
+  }
+  .hero-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .hex-logo { display: inline-block; flex-shrink: 0; }
+  .hex-logo svg { width: 52px; height: auto; }
+
+  .hero-text { text-align: left; }
+  .brand-name {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .brand-name .be  { color: #ffffff; }
+  .brand-name .fit { color: var(--red); }
+
+  .hero-sub {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(30,74,158,.15);
+    border: 1px solid rgba(30,74,158,.4);
+    color: var(--blue-light);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-top: 10px;
+  }
+
+  /* ── DIVIDER ── */
+  .stripe {
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--red) 100%);
+  }
+
+  /* ── FORM ── */
+  .card {
+    max-width: 600px;
+    margin: 28px auto 0;
+    padding: 0 16px;
+  }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin: 28px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width:480px){ .grid2 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  label .req { color: var(--red); margin-left: 2px; }
+
+  input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    accent-color: var(--red);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  input, select, textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 11px 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 3px rgba(30,74,158,.18);
+  }
+  input.err, select.err { border-color: var(--error); }
+  .err-msg { font-size: 11px; color: var(--error); display: none; }
+  .err-msg.show { display: block; }
+  select option { background: #111; }
+  textarea { resize: vertical; min-height: 80px; }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.4); cursor: pointer; }
+
+  /* ── CHIPS ── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: none; }
+  .chip + label {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #aaa;
+    padding: 7px 14px;
+    transition: all .2s;
+    user-select: none;
+  }
+  .chip:checked + label {
+    background: rgba(204,31,31,.12);
+    border-color: var(--red);
+    color: #ff6666;
+  }
+
+  /* ── PRIVACY ── */
+  .privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 24px;
+  }
+  .privacy input[type="checkbox"] {
+    width: 16px; height: 16px; flex-shrink: 0;
+    accent-color: var(--red);
+    margin-top: 2px;
+  }
+  .privacy p { font-size: 12px; color: #777; line-height: 1.5; }
+  .privacy a { color: var(--blue-light); text-decoration: none; }
+
+  /* ── CUSTOM CHECKBOX ── */
+  .check-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .check-wrap input[type="checkbox"] {
+    display: none !important;
+  }
+  .check-box {
+    width: 22px; height: 22px;
+    min-width: 22px;
+    border-radius: 6px;
+    border: 2px solid #555;
+    background: #111;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+    margin-top: 15px;
+    flex-shrink: 0;
+  }
+  .check-box .check-icon {
+    display: none;
+    width: 12px; height: 8px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(-45deg) translateY(-2px);
+  }
+  .check-wrap input[type="checkbox"]:checked ~ .check-box {
+    background: var(--red);
+    border-color: var(--red);
+    box-shadow: 0 0 8px rgba(204,31,31,.4);
+  }
+  .check-wrap input[type="checkbox"]:checked ~ .check-box .check-icon {
+    display: block;
+  }
+  .check-label { font-size: 8px; color: #777; line-height: 1.55; margin-top: 15px; }
+  
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap { position: relative; display: inline-flex; }
+  .info-btn {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--blue-light);
+    background: transparent;
+    color: var(--blue-light);
+    font-size: 11px;
+    font-weight: 700;
+    font-style: italic;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, color .2s;
+    flex-shrink: 0;
+  }
+  .info-btn:hover { background: var(--blue-light); color: #fff; }
+  .tooltip-box {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--blue-light);
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 240px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #ccc;
+    z-index: 100;
+    box-shadow: 0 6px 24px rgba(0,0,0,.6);
+    text-align: left;
+  }
+  .tooltip-box::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--blue-light);
+  }
+  .tooltip-box strong { color: #fff; display: block; margin-bottom: 5px; font-size: 12px; }
+  .tooltip-box em { color: var(--red); font-style: normal; font-weight: 700; }
+  .tooltip-wrap:hover .tooltip-box,
+  .tooltip-wrap.open   .tooltip-box { display: block; }
+
+  @media(max-width:400px){
+    .tooltip-box { left: auto; right: 0; transform: none; }
+    .tooltip-box::after { left: auto; right: 12px; transform: none; }
+  }
+  .btn {
+    width: 100%;
+    margin-top: 20px;
+    background: var(--red);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    padding: 15px;
+    transition: background .2s, transform .1s, box-shadow .2s;
+    box-shadow: 0 4px 22px rgba(204,31,31,.35);
+  }
+  .btn:hover { background: var(--red-dark); box-shadow: 0 4px 28px rgba(204,31,31,.5); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .btn .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SUCCESS ── */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 52px 20px;
+  }
+  .success-icon {
+    width: 76px; height: 76px;
+    background: rgba(34,197,94,.1);
+    border: 2px solid var(--success);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    margin: 0 auto 20px;
+    animation: pop .4s ease;
+  }
+  @keyframes pop {
+    0%   { transform: scale(.5); opacity: 0; }
+    80%  { transform: scale(1.1); }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  .success-screen h2 { font-size: 22px; margin-bottom: 10px; }
+  .success-screen p  { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--error);
+    color: #fff;
+    font-size: 13px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: transform .3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hex-logo">
+      <!-- Reemplaza ./logo.png con el nombre real de tu imagen -->
+      <img src="/img/BeFit.png" alt="BeFit Logo" style="margin-top: -20px; width:200px;height:200px;object-fit:contain;"/>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:-20px">
+    <span class="badge">✦ Pre-Inscripción </br> ✦ Próxima apertura</span>
+    <div class="tooltip-wrap">
+      <button class="info-btn" aria-label="Más información">i</button>
+      <div class="tooltip-box">
+        <strong>¿Qué es la pre-inscripción?</strong>
+        <p>Este registro es <em>completamente gratuito</em> y sin compromiso. Solo necesitamos tus datos para agilizar tu proceso de ingreso el día de la apertura del gym. No se realiza ningún cobro en este momento.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="stripe"></div>
+
+<!-- FORM -->
+<div class="card">
+  <form id="form" novalidate>
+
+    <!-- DATOS PERSONALES -->
+    <div class="section-title">Datos Personales</div>
+    <div class="grid2">
+      <div class="field">
+        <label>Nombre(s)<span class="req">*</span></label>
+        <input type="text" id="nombre" placeholder="Ej. Eduardo" autocomplete="given-name"/>
+        <span class="err-msg" id="err-nombre">Campo requerido</span>
+      </div>
+      <div class="field">
+        <label>Apellidos<span class="req">*</span></label>
+        <input type="text" id="apellidos" placeholder="Ej. García López" autocomplete="family-name"/>
+        <span class="err-msg" id="err-apellidos">Campo requerido</span>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:12px">
+      <div class="field">
+        <label>Fecha de Nacimiento<span class="req">*</span></label>
+        <input type="date" id="fechanac" max=""/>
+        <span class="err-msg" id="err-fechanac">Ingresa una fecha válida</span>
+      </div>
+      <div class="field">
+        <label>Género</label>
+        <select id="genero">
+          <option value="">Seleccionar...</option>
+          <option>Masculino</option>
+          <option>Femenino</option>
+          <option>Prefiero no decir</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CONTACTO -->
+    <div class="section-title">Contacto</div>
+    <div class="field">
+      <label>Correo Electrónico<span class="req">*</span></label>
+      <input type="email" id="email" placeholder="correo@ejemplo.com" autocomplete="email"/>
+      <span class="err-msg" id="err-email">Ingresa un correo válido</span>
+    </div>
+
+    <div class="grid2" style="margin-top:12px">
+      <div class="field">
+        <label>Número Telefónico<span class="req">*</span></label>
+        <input type="tel" id="telefono" placeholder="81 1234 5678" maxlength="15" autocomplete="tel"/>
+        <span class="err-msg" id="err-telefono">Mínimo 10 dígitos</span>
+      </div>
+      <div class="field">
+        <label>Contacto de Emergencia<span class="req">*</span></label>
+        <input type="tel" id="emergencia" placeholder="81 9876 5432" maxlength="15"/>
+        <span class="err-msg" id="err-emergencia">Mínimo 10 dígitos</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:12px">
+      <label>Relación con el contacto de emergencia</label>
+      <select id="relacionEmergencia">
+        <option value="">Seleccionar...</option>
+        <option>Familiar</option>
+        <option>Pareja</option>
+        <option>Amigo/a</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <!-- OBJETIVO -->
+    <div class="section-title">Membresía de Interés</div>
+    <div class="field">
+      <label>Objetivo fitness principal</label>
+      <div class="chips">
+        <input class="chip" type="checkbox" id="obj1" name="objetivo" value="Perder peso"/>
+        <label for="obj1">🔥 Perder peso</label>
+        <input class="chip" type="checkbox" id="obj2" name="objetivo" value="Ganar músculo"/>
+        <label for="obj2">💪 Ganar músculo</label>
+        <input class="chip" type="checkbox" id="obj3" name="objetivo" value="Mejorar resistencia"/>
+        <label for="obj3">🏃 Mejorar resistencia</label>
+        <input class="chip" type="checkbox" id="obj4" name="objetivo" value="Reducir estrés"/>
+        <label for="obj4">🧘 Reducir estrés</label>
+        <input class="chip" type="checkbox" id="obj5" name="objetivo" value="Rendimiento deportivo"/>
+        <label for="obj5">⚡ Rendimiento deportivo</label>
+        <input class="chip" type="checkbox" id="obj6" name="objetivo" value="Hábito saludable"/>
+        <label for="obj6">🥗 Hábito saludable</label>
+      </div>
+    </div>
+
+    <!-- SALUD -->
+    <div class="section-title">Información de Salud</div>
+    <div class="field">
+      <label>¿Tienes alguna condición médica o lesión relevante?</label>
+      <textarea id="condicion" placeholder="Ej. hipertensión, lesión de rodilla, diabetes... (escribe 'Ninguna' si no aplica)"></textarea>
+    </div>
+
+    <!-- CÓMO NOS CONOCIÓ -->
+    <div class="section-title">¿Cómo nos conociste?</div>
+    <div class="field">
+      <select id="canal">
+        <option value="">Seleccionar...</option>
+        <option>Instagram</option>
+        <option>Facebook</option>
+        <option>TikTok</option>
+        <option>Recomendación de un amigo</option>
+        <option>Volante / cartel</option>
+        <option>Pasé por el lugar</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <!-- PRIVACIDAD -->
+    <label class="check-wrap" for="privacidad">
+      <input type="checkbox" id="privacidad"/>
+      <span class="check-box"><span class="check-icon"></span></span>
+      <p class="check-label">Acepto que mis datos sean utilizados por BeFit Gym exclusivamente para el proceso de inscripción. No serán compartidos con terceros.</p>
+    </label>
+    <span class="err-msg" id="err-privacidad" style="margin-top:6px">Debes aceptar el aviso de privacidad</span>
+
+    <button type="submit" class="btn" id="btn">
+      <span id="btn-text">Enviar Pre-Inscripción</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success">
+    <div class="success-icon">✓</div>
+    <h2>¡Registro exitoso!</h2>
+    <p>Tu pre-inscripción en <strong>BeFit Gym</strong> fue recibida.<br/>
+    
+     Ya no es necesario llenar el formulario de nuevo. <br/><br/>
+      
+     Una vez que abramos nuestras instalaciones, 
+     solo menciona que ya estas pre-inscrito con tu nombre completo o correo electrónico en recepción para la toma de biometría y acceso a nuestras instalaciones.<br/><br/>
+    <span style="color:var(--red);font-weight:700">¡Nos vemos pronto! 💪</span></p>
+  </div>
+</div>
+
+<div class="toast" id="toast">Ocurrió un error. Intenta de nuevo.</div>
+
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────
+// Apunta a la función serverless de Netlify (no expone ningún secreto)
+const APPS_SCRIPT_URL = '/.netlify/functions/registro';
+// ─────────────────────────────────────────────────────────────
+
+// Tooltip tap para móvil
+document.querySelector('.info-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.querySelector('.tooltip-wrap').classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  document.querySelector('.tooltip-wrap')?.classList.remove('open');
+});
+
+// ─── CONFIGURACIÓN ─── = 'TU_APPS_SCRIPT_URL_AQUI';
+
+// Límite: mayor de 12 años
+const maxDate = new Date();
+maxDate.setFullYear(maxDate.getFullYear() - 12);
+document.getElementById('fechanac').max = maxDate.toISOString().split('T')[0];
+
+const $ = id => document.getElementById(id);
+const showErr = (id, msg) => {
+  const el = $(`err-${id}`);
+  if (msg) el.textContent = msg;
+  el.classList.add('show');
+  $(id)?.classList.add('err');
+};
+const clearErr = id => {
+  $(`err-${id}`)?.classList.remove('show');
+  $(id)?.classList.remove('err');
+};
+const showToast = msg => {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+};
+
+['nombre','apellidos','fechanac','email','telefono','emergencia'].forEach(id => {
+  $(id)?.addEventListener('input',  () => clearErr(id));
+  $(id)?.addEventListener('change', () => clearErr(id));
+});
+
+function validate() {
+  let ok = true;
+  const req = (id, msg) => {
+    if (!$(id).value.trim()) { showErr(id, msg || 'Campo requerido'); ok = false; }
+    else clearErr(id);
+  };
+  req('nombre'); req('apellidos');
+
+  if (!$('fechanac').value) { showErr('fechanac', 'Ingresa tu fecha de nacimiento'); ok = false; }
+  else clearErr('fechanac');
+
+  const emailVal = $('email').value.trim();
+  if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    showErr('email', 'Ingresa un correo válido'); ok = false;
+  } else clearErr('email');
+
+  const clean = v => v.replace(/\D/g, '');
+  if (clean($('telefono').value).length < 10)  { showErr('telefono',  'Mínimo 10 dígitos'); ok = false; } else clearErr('telefono');
+  if (clean($('emergencia').value).length < 10) { showErr('emergencia','Mínimo 10 dígitos'); ok = false; } else clearErr('emergencia');
+
+  if (!$('privacidad').checked) { $('err-privacidad').classList.add('show'); ok = false; }
+  else $('err-privacidad').classList.remove('show');
+  return ok;
+}
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!validate()) {
+    document.querySelector('input.err, select.err')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const objetivos = [...document.querySelectorAll('input[name="objetivo"]:checked')]
+    .map(c => c.value).join(', ') || 'No especificado';
+
+  const payload = {
+    timestamp:          new Date().toLocaleString('es-MX'),
+    nombre:             $('nombre').value.trim(),
+    apellidos:          $('apellidos').value.trim(),
+    fechaNacimiento:    $('fechanac').value,
+    genero:             $('genero').value || 'No especificado',
+    email:              $('email').value.trim(),
+    telefono:           $('telefono').value.trim(),
+    contactoEmergencia: $('emergencia').value.trim(),
+    relacionEmergencia: $('relacionEmergencia').value || 'No especificado',
+    objetivos,
+    condicionMedica:    $('condicion').value.trim() || 'Ninguna',
+    canal:              $('canal').value || 'No especificado',
+  };
+
+  $('btn').disabled = true;
+  $('btn-text').style.display = 'none';
+  $('spinner').style.display = 'block';
+
+  try {
+    // Modo local (abrir archivo directo sin servidor)
+    if (window.location.protocol === 'file:') {
+      await new Promise(r => setTimeout(r, 1200));
+      console.table(payload);
+      $('form').style.display    = 'none';
+      $('success').style.display = 'block';
+      return;
+    }
+
+    const res    = await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const result = await res.json();
+
+    if (result.status === 'duplicate') {
+      showErr('email', '⚠️ Este correo ya está registrado.');
+      $('email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('btn').disabled          = false;
+      $('btn-text').style.display = 'block';
+      $('spinner').style.display  = 'none';
+      return;
+    }
+
+    if (result.status !== 'ok') throw new Error(result.message);
+
+    $('form').style.display    = 'none';
+    $('success').style.display = 'block';
+
+  } catch {
+    showToast('Error al enviar. Verifica tu conexión e intenta de nuevo.');
+    $('btn').disabled          = false;
+    $('btn-text').style.display = 'block';
+    $('spinner').style.display  = 'none';
+  }
+});
+</script>
+</body>
+</html>
