@@ -287,12 +287,12 @@
             <input class="input-field ej-nombre" type="text" placeholder="Nombre del ejercicio" value="${ej.nombre}" style="flex:1;" />
             <button type="button" class="btn-xs danger btn-rm-ej" title="Quitar">&#x2715;</button>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;">
             <input class="input-field ej-series" type="text" placeholder="Series" value="${ej.series}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
             <input class="input-field ej-reps" type="text" placeholder="Reps" value="${ej.repeticiones}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
-            <input class="input-field ej-descanso" type="text" placeholder="Descanso" value="${ej.descanso}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
-            <input class="input-field ej-peso" type="text" placeholder="Peso sugerido" value="${ej.peso_sugerido || ''}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
           </div>
+          <input class="ej-descanso" type="hidden" value="${ej.descanso || ''}" />
+          <input class="ej-peso" type="hidden" value="${ej.peso_sugerido || ''}" />
           <input class="input-field ej-notas" type="text" placeholder="Notas del coach (opcional)" value="${ej.notas || ''}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
         </div>`;
     }
