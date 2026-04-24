@@ -26,7 +26,10 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=30',
+      },
       body: JSON.stringify({ status: 'ok', data: respuesta.data || [] }),
     };
   } catch (error) {

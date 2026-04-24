@@ -4,11 +4,25 @@ async function llamarAppsScript(action, payload) {
     throw new Error('APPS_SCRIPT_URL no configurada');
   }
 
-  const response = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, payload }),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 9000);
+
+  let response;
+  try {
+    response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, payload }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      throw new Error('Apps Script no respondio a tiempo (timeout 9s)');
+    }
+    throw err;
+  }
+  clearTimeout(timer);
 
   const texto = await response.text();
   let json;
