@@ -44,6 +44,8 @@
   ];
 
   let sociosActuales = [];
+  let plantillasActuales = [];
+  let plantillaACargar = null;
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   function parsearJsonSeguro(valor, fallback) {
@@ -255,7 +257,8 @@
 
     // ── TAB RUTINA EDITABLE ────────────────────────────────────────────────
     function buildDiasState() {
-      const diasExistentes = socio.rutina?.dias || {};
+      const fuente = plantillaACargar || socio.rutina;
+      const diasExistentes = fuente?.dias || {};
       const claves = Object.keys(diasExistentes);
       if (claves.length > 0) {
         return claves.map((clave) => {
@@ -320,13 +323,20 @@
 
     function renderRutina() {
       const dias = buildDiasState();
+      const nombreRutinaVal = plantillaACargar
+        ? plantillaACargar.nombre_rutina || ''
+        : (socio.rutina.nombre_rutina !== 'Sin rutina activa' ? socio.rutina.nombre_rutina : '');
       detalle.innerHTML = `
         <h3 style="margin:0 0 4px 0;">${socio.nombre}</h3>
         <p class="muted" style="margin:0 0 12px 0;">${socio.numero_socio}</p>
         ${renderTabs()}
-        <div style="display:grid;gap:10px;margin-bottom:14px;">
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
           <input id="inputNombreRutina" class="input-field" type="text" placeholder="Nombre de la rutina"
-                 value="${socio.rutina.nombre_rutina !== 'Sin rutina activa' ? socio.rutina.nombre_rutina : ''}" />
+                 value="${nombreRutinaVal}" style="flex:1;" />
+          <button type="button" id="btnCargarPlantilla" class="btn-ghost"
+                  style="font-size:11px;white-space:nowrap;">&#x1F4CB; Plantilla</button>
+        </div>
+        <div style="display:grid;gap:10px;margin-bottom:14px;">
           <input id="inputFechaInicio" class="input-field" type="date"
                  value="${socio.rutina.fecha_inicio || new Date().toISOString().slice(0, 10)}" />
           <textarea id="inputObservaciones" class="input-field" rows="2"
@@ -417,6 +427,13 @@
     function enlazarFormRutina() {
       const contenedor = detalle.querySelector('#contenedorDias');
 
+      detalle.querySelector('#btnCargarPlantilla').addEventListener('click', () => {
+        abrirSelectorPlantilla((plantillaSeleccionada) => {
+          plantillaACargar = plantillaSeleccionada;
+          renderRutina();
+        });
+      });
+
       contenedor.querySelectorAll('.dia-bloque').forEach((bloque) => {
         enlazarQuitarDia(bloque);
         enlazarAgregarEjercicio(bloque);
@@ -492,6 +509,7 @@
           socio.rutina.dias = diasObj;
           socio.estado = 'Rutina activa';
           socio.dias = diasDesde(fechaInicio);
+          plantillaACargar = null;
           pintar(sociosActuales);
           mostrarMensaje(msg, 'Rutina guardada correctamente.');
         } catch {
@@ -671,9 +689,379 @@
     }
   });
 
+  // ── Carga de plantillas ───────────────────────────────────────────────────
+  async function cargarPlantillas() {
+    try {
+      const resp = await window.BEFIT_API.getRutinasPredefinidas();
+      plantillasActuales = Array.isArray(resp?.data) ? resp.data : [];
+    } catch {
+      plantillasActuales = [];
+    }
+  }
+
+  // ── Lista de plantillas ───────────────────────────────────────────────────
+  function pintarPlantillas(items) {
+    const listaPlantillas = document.getElementById('listaPlantillas');
+    if (!listaPlantillas) return;
+    if (!items.length) {
+      listaPlantillas.innerHTML = '<article class="card" style="padding:12px;font-size:13px;">Sin plantillas creadas.</article>';
+      return;
+    }
+    listaPlantillas.innerHTML = items
+      .map(
+        (p) => `
+        <article class="card" style="padding:12px;display:grid;gap:6px;">
+          <strong style="font-size:13px;">${p.nombre_rutina || 'Sin nombre'}</strong>
+          ${p.coach_nombre ? `<div class="muted" style="font-size:11px;">Por: ${p.coach_nombre}</div>` : ''}
+          <button type="button" class="btn-ghost" data-plantilla="${p.id}" style="font-size:11px;">Ver / Editar</button>
+        </article>
+      `,
+      )
+      .join('');
+    listaPlantillas.querySelectorAll('button[data-plantilla]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const p = plantillasActuales.find((x) => x.id === btn.dataset.plantilla);
+        if (p) mostrarEditorPlantilla(p);
+      });
+    });
+  }
+
+  // ── Selector de plantilla (modal dinamico) ────────────────────────────────
+  function abrirSelectorPlantilla(onSeleccion) {
+    const existing = document.getElementById('modalSelectorPlantilla');
+    if (existing) existing.remove();
+
+    if (!plantillasActuales.length) {
+      // eslint-disable-next-line no-alert
+      alert('No hay plantillas disponibles. Primero crea una en la seccion Plantillas.');
+      return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'modalSelectorPlantilla';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-panel" style="max-width:420px;">
+        <button class="modal-close" id="btnCerrarSelectorPlantilla" type="button">&#x2715;</button>
+        <h2>Seleccionar plantilla</h2>
+        <p class="muted" style="font-size:12px;margin:0 0 14px;">La plantilla pre-llenara el formulario. Podras editar antes de guardar.</p>
+        <div style="display:grid;gap:8px;max-height:340px;overflow-y:auto;">
+          ${plantillasActuales
+            .map(
+              (p) => `
+            <button type="button" class="card" data-pid="${p.id}"
+                    style="padding:10px;text-align:left;border:none;cursor:pointer;width:100%;background:var(--card);">
+              <div style="font-weight:600;font-size:13px;">${p.nombre_rutina || 'Sin nombre'}</div>
+              ${p.coach_nombre ? `<div class="muted" style="font-size:11px;">Por: ${p.coach_nombre}</div>` : ''}
+            </button>
+          `,
+            )
+            .join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('btnCerrarSelectorPlantilla').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelectorAll('[data-pid]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const p = plantillasActuales.find((x) => x.id === btn.dataset.pid);
+        if (p) { overlay.remove(); onSeleccion(p); }
+      });
+    });
+  }
+
+  // ── Editor de plantilla ───────────────────────────────────────────────────
+  function mostrarEditorPlantilla(plantillaInicial) {
+    let plantilla = plantillaInicial;
+    let esNueva = !plantilla?.id;
+
+    function _htmlEjercicio(ej) {
+      return `
+        <div class="ejercicio-row" draggable="true"
+             style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px;display:grid;gap:6px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="drag-handle" title="Arrastrar">&#x2630;</span>
+            <input class="input-field ej-nombre" type="text" placeholder="Nombre del ejercicio" value="${ej.nombre}" style="flex:1;" />
+            <button type="button" class="btn-xs danger btn-rm-ej" title="Quitar">&#x2715;</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:5px;">
+            <input class="input-field ej-series" type="text" placeholder="Series" value="${ej.series}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
+            <input class="input-field ej-reps" type="text" placeholder="Reps" value="${ej.repeticiones}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
+          </div>
+          <input class="ej-descanso" type="hidden" value="${ej.descanso || ''}" />
+          <input class="ej-peso" type="hidden" value="${ej.peso_sugerido || ''}" />
+          <input class="input-field ej-notas" type="text" placeholder="Notas (opcional)" value="${ej.notas || ''}" style="font-size:11px;min-height:36px;padding:6px 8px;" />
+        </div>`;
+    }
+
+    function _htmlDia(diaIndex, dia) {
+      return `
+        <div class="dia-bloque accordion-item open" data-dia="${diaIndex}"
+             style="margin-bottom:10px;">
+          <div class="accordion-header">
+            <input class="input-field dia-nombre" type="text" placeholder="Nombre del dia"
+                   value="${dia.nombre}" style="flex:1;background:transparent;border:none;padding:0;font-weight:700;" />
+            <span class="accordion-chevron">&#x25BC;</span>
+          </div>
+          <div class="accordion-body">
+            <div class="lista-ejercicios" style="margin-bottom:8px;">
+              ${dia.ejercicios.map(_htmlEjercicio).join('')}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="btn-ghost btn-add-ej" style="font-size:11px;">+ Ejercicio</button>
+              <button type="button" class="btn-xs danger btn-rm-dia">&#x1F5D1; Eliminar dia</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    const diasArr = plantilla
+      ? Object.keys(plantilla.dias || {}).map((clave) => {
+          const dia = plantilla.dias[clave];
+          return {
+            nombre: dia.nombre || '',
+            ejercicios: Array.isArray(dia.ejercicios)
+              ? dia.ejercicios.map((ej) => ({
+                  nombre: ej.nombre || '',
+                  series: ej.series || '',
+                  repeticiones: ej.repeticiones || '',
+                  descanso: ej.descanso || '',
+                  peso_sugerido: ej.peso_sugerido || '',
+                  notas: ej.notas || '',
+                }))
+              : [{ nombre: '', series: '', repeticiones: '', descanso: '', peso_sugerido: '', notas: '' }],
+          };
+        })
+      : [{ nombre: '', ejercicios: [{ nombre: '', series: '', repeticiones: '', descanso: '', peso_sugerido: '', notas: '' }] }];
+
+    detalle.innerHTML = `
+      <h3 style="margin:0 0 4px 0;">${esNueva ? 'Nueva plantilla' : 'Editar plantilla'}</h3>
+      ${!esNueva && plantilla.coach_nombre
+        ? `<p class="muted" style="margin:0 0 12px 0;font-size:12px;">Creada por: ${plantilla.coach_nombre}</p>`
+        : '<div style="margin-bottom:12px;"></div>'}
+      <div style="margin-bottom:14px;">
+        <input id="inputNombrePlantilla" class="input-field" type="text" placeholder="Nombre de la plantilla"
+               value="${plantilla?.nombre_rutina || ''}" />
+      </div>
+      <div id="contenedorDiasPlantilla">${diasArr.map((dia, i) => _htmlDia(i, dia)).join('')}</div>
+      <button type="button" id="btnAddDiaPlantilla" class="btn-ghost" style="margin-bottom:14px;font-size:12px;">+ Agregar dia</button>
+      <div id="msgPlantilla" style="min-height:18px;font-size:12px;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;">
+        ${!esNueva ? '<button type="button" id="btnEliminarPlantilla" class="btn-ghost" style="color:var(--error);border-color:var(--error);">Eliminar</button>' : ''}
+        <button type="button" id="btnGuardarPlantilla" class="btn-red" style="flex:1;">Guardar plantilla</button>
+      </div>
+    `;
+
+    const cont = detalle.querySelector('#contenedorDiasPlantilla');
+    const msg = detalle.querySelector('#msgPlantilla');
+
+    let _dragSrc = null;
+
+    function _enlazarDragDropRow(row, container) {
+      row.addEventListener('dragstart', (e) => {
+        _dragSrc = row;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => row.classList.add('dragging'), 0);
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+        container.querySelectorAll('.ejercicio-row').forEach((r) => r.classList.remove('drag-over'));
+        _dragSrc = null;
+      });
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (_dragSrc && _dragSrc !== row) {
+          container.querySelectorAll('.ejercicio-row').forEach((r) => r.classList.remove('drag-over'));
+          row.classList.add('drag-over');
+        }
+      });
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (_dragSrc && _dragSrc !== row) {
+          const rows = [...container.querySelectorAll('.ejercicio-row')];
+          const srcIdx = rows.indexOf(_dragSrc);
+          const tgtIdx = rows.indexOf(row);
+          if (srcIdx < tgtIdx) row.after(_dragSrc);
+          else row.before(_dragSrc);
+          row.classList.remove('drag-over');
+        }
+      });
+    }
+
+    function _enlazarQuitarEjercicio(row) {
+      row.querySelector('.btn-rm-ej').addEventListener('click', () => row.remove());
+    }
+
+    function _agregarEjercicio(diaBloque) {
+      const listaEl = diaBloque.querySelector('.lista-ejercicios');
+      const div = document.createElement('div');
+      div.innerHTML = _htmlEjercicio({ nombre: '', series: '', repeticiones: '', descanso: '', peso_sugerido: '', notas: '' });
+      const row = div.firstElementChild;
+      listaEl.appendChild(row);
+      _enlazarQuitarEjercicio(row);
+      _enlazarDragDropRow(row, listaEl);
+    }
+
+    function _enlazarBloque(bloque) {
+      const header = bloque.querySelector('.accordion-header');
+      if (header) {
+        header.querySelector('.accordion-chevron').addEventListener('click', () => {
+          bloque.classList.toggle('open');
+        });
+      }
+      bloque.querySelector('.btn-rm-dia').addEventListener('click', () => bloque.remove());
+      bloque.querySelector('.btn-add-ej').addEventListener('click', () => _agregarEjercicio(bloque));
+      bloque.querySelectorAll('.ejercicio-row').forEach((row) => {
+        _enlazarQuitarEjercicio(row);
+        _enlazarDragDropRow(row, bloque.querySelector('.lista-ejercicios'));
+      });
+    }
+
+    cont.querySelectorAll('.dia-bloque').forEach(_enlazarBloque);
+
+    detalle.querySelector('#btnAddDiaPlantilla').addEventListener('click', () => {
+      const idx = cont.querySelectorAll('.dia-bloque').length;
+      const div = document.createElement('div');
+      div.innerHTML = _htmlDia(idx, {
+        nombre: '',
+        ejercicios: [{ nombre: '', series: '', repeticiones: '', descanso: '', peso_sugerido: '', notas: '' }],
+      });
+      const bloque = div.firstElementChild;
+      cont.appendChild(bloque);
+      _enlazarBloque(bloque);
+    });
+
+    function _leerDias() {
+      const diasObj = {};
+      cont.querySelectorAll('.dia-bloque').forEach((bloque, i) => {
+        const clave = `dia${i + 1}`;
+        const nombreDia = bloque.querySelector('.dia-nombre').value.trim() || `Dia ${i + 1}`;
+        const ejercicios = [];
+        bloque.querySelectorAll('.ejercicio-row').forEach((row) => {
+          const nombre = row.querySelector('.ej-nombre').value.trim();
+          if (!nombre) return;
+          ejercicios.push({
+            nombre,
+            series: row.querySelector('.ej-series').value.trim() || '-',
+            repeticiones: row.querySelector('.ej-reps').value.trim() || '-',
+            descanso: row.querySelector('.ej-descanso').value.trim() || '-',
+            peso_sugerido: row.querySelector('.ej-peso').value.trim(),
+            notas: row.querySelector('.ej-notas').value.trim(),
+          });
+        });
+        diasObj[clave] = { nombre: nombreDia, ejercicios };
+      });
+      return diasObj;
+    }
+
+    function _enlazarDeleteBtn() {
+      const btnEliminar = detalle.querySelector('#btnEliminarPlantilla');
+      if (!btnEliminar) return;
+      btnEliminar.addEventListener('click', async () => {
+        // eslint-disable-next-line no-alert
+        if (!confirm('¿Eliminar esta plantilla? Esta accion no se puede deshacer.')) return;
+        btnEliminar.disabled = true;
+        try {
+          await window.BEFIT_API.deleteRutinaPredefinida(plantilla.id);
+          plantillasActuales = plantillasActuales.filter((p) => p.id !== plantilla.id);
+          pintarPlantillas(plantillasActuales);
+          detalle.innerHTML = '<p class="muted" style="padding:12px;">Plantilla eliminada. Selecciona o crea una nueva.</p>';
+        } catch {
+          mostrarMensaje(msg, 'Error al eliminar la plantilla.', true);
+          btnEliminar.disabled = false;
+        }
+      });
+    }
+
+    if (!esNueva) _enlazarDeleteBtn();
+
+    detalle.querySelector('#btnGuardarPlantilla').addEventListener('click', async () => {
+      const nombre = detalle.querySelector('#inputNombrePlantilla').value.trim();
+      if (!nombre) {
+        mostrarMensaje(msg, 'El nombre de la plantilla es obligatorio.', true);
+        return;
+      }
+      const diasObj = _leerDias();
+      const payload = {
+        id: plantilla?.id || '',
+        nombre_rutina: nombre,
+        dias: diasObj,
+      };
+      const btnGuardar = detalle.querySelector('#btnGuardarPlantilla');
+      btnGuardar.disabled = true;
+      mostrarMensaje(msg, 'Guardando...', false);
+      try {
+        const resp = await window.BEFIT_API.saveRutinaPredefinida(payload);
+        const saved = resp?.data || {};
+        if (esNueva) {
+          plantilla = {
+            ...payload,
+            id: saved.id || String(Date.now()),
+            coach_nombre: usuario.nombre_completo || usuario.username || '',
+          };
+          esNueva = false;
+          plantillasActuales.push(plantilla);
+          const btnGuardarEl = detalle.querySelector('#btnGuardarPlantilla');
+          btnGuardarEl.insertAdjacentHTML(
+            'beforebegin',
+            '<button type="button" id="btnEliminarPlantilla" class="btn-ghost" style="color:var(--error);border-color:var(--error);">Eliminar</button>',
+          );
+          _enlazarDeleteBtn();
+        } else {
+          const idx = plantillasActuales.findIndex((p) => p.id === plantilla.id);
+          if (idx > -1) {
+            plantillasActuales[idx] = { ...plantillasActuales[idx], nombre_rutina: nombre, dias: diasObj };
+            plantilla = plantillasActuales[idx];
+          }
+        }
+        pintarPlantillas(plantillasActuales);
+        mostrarMensaje(msg, 'Plantilla guardada correctamente.');
+      } catch {
+        mostrarMensaje(msg, 'Error al guardar la plantilla.', true);
+      } finally {
+        btnGuardar.disabled = false;
+      }
+    });
+  }
+
+  // ── Toggle Socios / Plantillas ────────────────────────────────────────────
+  const tabSociosBtn = document.getElementById('tabSocios');
+  const tabPlantillasBtn = document.getElementById('tabPlantillas');
+  const seccionSocios = document.getElementById('seccionSocios');
+  const seccionPlantillas = document.getElementById('seccionPlantillas');
+
+  tabSociosBtn.addEventListener('click', () => {
+    tabSociosBtn.classList.add('active');
+    tabPlantillasBtn.classList.remove('active');
+    seccionSocios.classList.remove('hidden');
+    seccionPlantillas.classList.add('hidden');
+    detalle.innerHTML = 'Selecciona un socio para comenzar.';
+  });
+
+  tabPlantillasBtn.addEventListener('click', () => {
+    tabPlantillasBtn.classList.add('active');
+    tabSociosBtn.classList.remove('active');
+    seccionPlantillas.classList.remove('hidden');
+    seccionSocios.classList.add('hidden');
+    pintarPlantillas(plantillasActuales);
+    detalle.innerHTML = '<p class="muted" style="padding:12px;">Selecciona una plantilla o crea una nueva.</p>';
+  });
+
+  document.getElementById('btnNuevaPlantilla').addEventListener('click', () => {
+    mostrarEditorPlantilla(null);
+  });
+
+  document.getElementById('filtroPlantilla').addEventListener('input', () => {
+    const q = document.getElementById('filtroPlantilla').value.trim().toLowerCase();
+    const filtrados = plantillasActuales.filter((p) => (p.nombre_rutina || '').toLowerCase().includes(q));
+    pintarPlantillas(filtrados);
+  });
+
   // ── Init ──────────────────────────────────────────────────────────────────
   cargarSocios().finally(() => {
     if (!sociosActuales.length && esSesionDemo) sociosActuales = sociosDemo;
     pintar(sociosActuales);
   });
+  cargarPlantillas();
 })();

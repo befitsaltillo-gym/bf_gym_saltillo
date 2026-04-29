@@ -106,12 +106,30 @@
 
   <main class="container layout panel-grid two-col">
     <section class="card" style="padding:16px;">
-      <div class="section-head" style="margin-bottom:10px;">
-        <h2 class="section-title">Socios</h2>
-        <button type="button" id="btnNuevoSocio" class="btn-red" style="font-size:11px;">+ Nuevo Socio</button>
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button type="button" id="tabSocios" class="tab active" style="flex:1;">Socios</button>
+        <button type="button" id="tabPlantillas" class="tab" style="flex:1;">Plantillas</button>
       </div>
-      <input id="filtroSocio" class="input-field" type="text" placeholder="Buscar por nombre o numero de socio" />
-      <div id="listaSocios" style="display:grid;gap:10px;margin-top:12px;"></div>
+
+      <!-- Seccion Socios -->
+      <div id="seccionSocios">
+        <div class="section-head" style="margin-bottom:10px;">
+          <h2 class="section-title">Socios</h2>
+          <button type="button" id="btnNuevoSocio" class="btn-red" style="font-size:11px;">+ Nuevo Socio</button>
+        </div>
+        <input id="filtroSocio" class="input-field" type="text" placeholder="Buscar por nombre o numero de socio" />
+        <div id="listaSocios" style="display:grid;gap:10px;margin-top:12px;"></div>
+      </div>
+
+      <!-- Seccion Plantillas -->
+      <div id="seccionPlantillas" class="hidden">
+        <div class="section-head" style="margin-bottom:10px;">
+          <h2 class="section-title">Plantillas</h2>
+          <button type="button" id="btnNuevaPlantilla" class="btn-red" style="font-size:11px;">+ Nueva</button>
+        </div>
+        <input id="filtroPlantilla" class="input-field" type="text" placeholder="Buscar plantilla..." />
+        <div id="listaPlantillas" style="display:grid;gap:10px;margin-top:12px;"></div>
+      </div>
     </section>
 
     <section class="card" style="padding:16px;">
