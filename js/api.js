@@ -90,6 +90,24 @@ async function getHistorialRutinas(usuarioId) {
   });
 }
 
+async function getRutinasPredefinidas() {
+  return llamarApi('get-rutinas-predefinidas', { method: 'GET' });
+}
+
+async function saveRutinaPredefinida(payload) {
+  return llamarApi('save-rutina-predefinida', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+async function deleteRutinaPredefinida(id) {
+  return llamarApi('delete-rutina-predefinida', {
+    method: 'POST',
+    body: JSON.stringify({ id }),
+  });
+}
+
 window.BEFIT_API = {
   llamarApi,
   login,
@@ -101,4 +119,7 @@ window.BEFIT_API = {
   updateUsuario,
   createUsuario,
   getHistorialRutinas,
+  getRutinasPredefinidas,
+  saveRutinaPredefinida,
+  deleteRutinaPredefinida,
 };
